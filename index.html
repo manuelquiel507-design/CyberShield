@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberShield - Hub de Innovación y Tecnologías Emergentes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0a0f1d; --bg-sidebar: #060a15; --bg-card: rgba(20, 28, 47, 0.6);
+            --accent: #00f2fe; --accent-green: #00ff88; --accent-red: #ff4b4b; --text-main: #ffffff; --text-muted: #8b9bb4; --border: rgba(0, 242, 254, 0.15);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg-main); color: var(--text-main); font-family: 'Poppins', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        .dashboard-container { display: flex; flex: 1; position: relative; width: 100%; }
+        
+        aside { background-color: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 2.5rem 1.5rem; position: fixed; width: 280px; height: 100vh; display: flex; flex-direction: column; justify-content: space-between; z-index: 100; }
+        .logo { font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; font-weight: bold; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+        .menu-list { list-style: none; margin-top: 2.5rem; }
+        .menu-item { margin-bottom: 1rem; }
+        .menu-item a { color: var(--text-muted); text-decoration: none; display: flex; align-items: center; gap: 12px; font-size: 0.95rem; padding: 12px; border-radius: 8px; transition: 0.3s; }
+        .menu-item.active a, .menu-item a:hover { color: var(--text-main); background: rgba(0, 242, 254, 0.08); border-left: 4px solid var(--accent); }
+
+        .system-status-widget { background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.03); margin-top: auto; margin-bottom: 1.5rem; }
+        .status-item { display: flex; align-items: center; gap: 10px; font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); margin-bottom: 6px; }
+        .status-dot { width: 7px; height: 7px; background-color: var(--accent-green); border-radius: 50%; display: inline-block; box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); animation: pulse-green 2s infinite; }
+        @keyframes pulse-green {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.5); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 255, 136, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+        }
+
+        main { flex: 1; padding: 3rem; margin-left: 280px; width: calc(100% - 280px); min-width: 0; }
+        header { margin-bottom: 2.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1.5rem; }
+        header h1 { font-size: 2.3rem; font-weight: 700; line-height: 1.2; margin-bottom: 0.5rem; color: #fff; }
+
+        .tabs-container { display: flex; gap: 10px; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; flex-wrap: wrap; }
+        .tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 10px 20px; font-family: inherit; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: 0.3s; position: relative; display: flex; align-items: center; gap: 8px; }
+        .tab-btn:hover { color: #fff; }
+        .tab-btn.active { color: var(--accent); font-weight: 600; }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: -11px; left: 0; width: 100%; height: 3px; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+        .tab-content { display: none; animation: fadeIn 0.4s ease-in-out forwards; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        .grid-tech { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+        .tech-card { background: var(--bg-card); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 1.75rem; backdrop-filter: blur(10px); transition: 0.3s; display: flex; flex-direction: column; justify-content: space-between; }
+        .tech-card:hover { border-color: var(--accent); box-shadow: 0 0 25px rgba(0, 242, 254, 0.15); transform: translateY(-3px); }
+        .tech-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .tech-card-title { font-size: 1.15rem; font-weight: 600; color: #fff; }
+        .tech-card-icon { width: 40px; height: 40px; border-radius: 8px; background: rgba(0, 242, 254, 0.08); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .tech-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
+        
+        .alert-box { background: rgba(255, 75, 75, 0.03); border-left: 3px solid var(--accent-red); padding: 12px; border-radius: 4px; margin-top: 1rem; font-size: 0.85rem; color: #fff; line-height: 1.5; }
+        .alert-box strong { color: var(--accent-red); display: block; margin-bottom: 2px; }
+
+        .feature-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; background: rgba(0, 255, 136, 0.08); color: var(--accent-green); padding: 4px 10px; border-radius: 4px; width: fit-content; margin-top: 1.2rem; font-weight: bold; }
+
+        footer { background-color: var(--bg-sidebar); border-top: 1px solid var(--border); padding: 1.5rem; text-align: center; font-size: 0.88rem; color: var(--text-muted); margin-left: 280px; width: calc(100% - 280px); }
+        footer strong { color: var(--accent); }
+
+        @media (max-width: 1024px) {
+            .dashboard-container { flex-direction: column; }
+            aside { position: static; width: 100%; height: auto; padding: 1.5rem; border-right: none; border-bottom: 1px solid var(--border); }
+            .menu-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1.5rem; }
+            .menu-item { margin-bottom: 0; }
+            .menu-item a { padding: 8px 14px; font-size: 0.9rem; }
+            .system-status-widget { display: none; }
+            main { margin-left: 0; width: 100%; padding: 2rem 1.5rem; }
+            header h1 { font-size: 1.8rem; }
+            footer { margin-left: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside>
+            <div>
+                <div class="logo"><i class="fa-solid fa-terminal"></i> CyberShield</div>
+                <ul class="menu-list">
+                    <li class="menu-item active"><a href="index.html"><i class="fa-solid fa-chart-line"></i> Inicio & IA</a></li>
+                    <li class="menu-item"><a href="amenazas.html"><i class="fa-solid fa-virus-slash"></i> Base de Amenazas</a></li>
+                    <li class="menu-item"><a href="buenas-practicas.html"><i class="fa-solid fa-user-shield"></i> Buenas Prácticas</a></li>
+                </ul>
+            </div>
+            
+            <div class="system-status-widget">
+                <div class="status-item"><span class="status-dot"></span> Firewall: OPERATIVO</div>
+                <div class="status-item"><span class="status-dot"></span> Zero-Trust: PROTEGIDO</div>
+                <div class="status-item"><span class="status-dot"></span> Tráfico Red: NORMAL</div>
+            </div>
+            
+            <div style="color: var(--text-muted); font-size: 0.8rem; font-family: monospace;">CORE // V2.6</div>
+        </aside>
+
+        <main>
+            <header>
+                <h1>Investigación en Tecnologías Emergentes e IA</h1>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">Análisis avanzado sobre la transformación digital de las infraestructuras actuales y los dilemas éticos de los modelos cognitivos autónomos.</p>
+            </header>
+            <div class="tabs-container">
+                <button class="tab-btn active" onclick="switchTab(event, 'tendencias')"><i class="fa-solid fa-microchip"></i> 1. Tendencias Tecnológicas</button>
+                <button class="tab-btn" onclick="switchTab(event, 'transformacion')"><i class="fa-solid fa-network-wired"></i> 2. Transformación Digital</button>
+                <button class="tab-btn" onclick="switchTab(event, 'etica')"><i class="fa-solid fa-brain"></i> 3. Ética y Modelos de IA</button>
+            </div>
+            <div id="tendencias" class="tab-content active">
+                <div class="grid-tech">
+                    <div class="tech-card">
+                        <div class="tech-card-header">
+                            <span class="tech-card-title">Inteligencia Artificial Generativa</span>
+                            <div class="tech-card-icon"><i class="fa-solid fa-robot"></i></div>
+                        </div>
+                        <p>Los modelos masivos LLM y redes neuronales profundas han pasado de automatizar tareas a co-crear código, analizar patrones masivos de comportamiento y predecir incidentes de red mediante análisis heurísticos complejos.</p>
+                        <span class="feature-tag">AUTONOMÍA AVANZADA</span>
+                    </div>
+                    <div class="tech-card">
+                        <div class="tech-card-header">
+                            <span class="tech-card-title">Computación Cuántica Perimetral</span>
+                            <div class="tech-card-icon"><i class="fa-solid fa-atom"></i></div>
+                        </div>
+                        <p>El procesamiento basado en cúbits superpuestos promete romper los algoritmos de clave pública tradicionales de forma instantánea, obligando al desarrollo paralelo de infraestructuras criptográficas post-cuánticas.</p>
+                        <span class="feature-tag">PROCESAMIENTO EXPONENCIAL</span>
+                    </div>
+                </div>
+            </div>
+            <div id="transformacion" class="tab-content">
+                <div class="grid-tech">
+                    <div class="tech-card">
+                        <div class="tech-card-header">
+                            <span class="tech-card-title">Migración Masiva e Infraestructura Cloud</span>
+                            <div class="tech-card-icon"><i class="fa-solid fa-cloud"></i></div>
+                        </div>
+                        <p>La descentralización de los servidores físicos tradicionales hacia arquitecturas multi-nube e híbridas acelera la entrega de servicios globales, pero expande exponencialmente la superficie de ataque perimetral de las empresas.</p>
+                        <span class="feature-tag">ARQUITECTURA HÍBRIDA</span>
+                    </div>
+                    <div class="tech-card">
+                        <div class="tech-card-header">
+                            <span class="tech-card-title">Conectividad IoT e Hiperconectividad</span>
+                            <div class="tech-card-icon"><i class="fa-solid fa-wifi"></i></div>
+                        </div>
+                        <p>La integración de miles de dispositivos inteligentes conectados a redes industriales y hogareñas optimiza la recolección de métricas en tiempo real, operando bajo un ecosistema que exige el despliegue inmediato de firewalls de próxima generación.</p>
+                        <span class="feature-tag">ECOSISTEMA INTERCONECTADO</span>
+                    </div>
+                </div>
+            </div>
+            <div id="etica" class="tab-content">
+                <div class="grid-tech">
+                    <div class="tech-card">
+                        <div class="tech-card-header">
+                            <span class="tech-card-title">Sesgo Algorítmico y Transparencia</span>
+                            <div class="tech-card-icon"><i class="fa-solid fa-scale-unbalanced"></i></div>
+                        </div>
+                        <p>Los modelos predictivos entrenados con datos históricos pueden perpetuar o amplificar discriminaciones estructurales. La auditoría lógica de las entradas de datos es vital para garantizar auditorías justas y procesos transparentes.</p>
+                        <div class="alert-box">
+                            <strong>Dilema Crítico:</strong> Si un algoritmo de IA toma decisiones autónomas de riesgo sin supervisión, la responsabilidad legal y ética entra en un vacío técnico complejo.
+                        </div>
+                    </div>
+                    <div class="tech-card">
+                        <div class="tech-card-header">
+                            <span class="tech-card-title">Privacidad de Datos y Derechos</span>
+                            <div class="tech-card-icon"><i class="fa-solid fa-user-lock"></i></div>
+                        </div>
+                        <p>El uso extensivo de bases de datos de usuarios para el reentrenamiento de redes neuronales pone en jaque el consentimiento digital. Los estándares éticos exigen técnicas avanzadas de anonimización y arquitecturas de resiliencia de datos.</p>
+                        <div class="alert-box">
+                            <strong>Buenas Prácticas:</strong> Implementar marcos globales de gobernanza que restrinjan la recolección masiva de metadatos de identidad sin tokenización previa.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+    <footer>Plataforma de Concientización &copy; 2026 | Desarrollada por <strong>Manuel Alexander Quiel Albelo</strong></footer>
+
+    <script>
+        function switchTab(event, tabId) {
+
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+</body>
+</html>
