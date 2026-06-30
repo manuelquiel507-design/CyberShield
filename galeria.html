@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberShield - Campaña Realizada en CRUSAM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0a0f1d; --bg-sidebar: #060a15; --bg-card: rgba(20, 28, 47, 0.6);
+            --accent: #00f2fe; --accent-green: #00ff88; --accent-orange: #ff9f0a; --text-main: #ffffff; --text-muted: #8b9bb4; --border: rgba(0, 242, 254, 0.15);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg-main); color: var(--text-main); font-family: 'Poppins', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        .dashboard-container { display: flex; flex: 1; position: relative; width: 100%; }
+        
+        /* Sidebar unificado */
+        aside { background-color: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 2.5rem 1.5rem; position: fixed; width: 280px; height: 100vh; display: flex; flex-direction: column; justify-content: space-between; z-index: 100; }
+        .logo { font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; font-weight: bold; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+        .menu-list { list-style: none; margin-top: 2.5rem; }
+        .menu-item { margin-bottom: 1rem; }
+        .menu-item a { color: var(--text-muted); text-decoration: none; display: flex; align-items: center; gap: 12px; font-size: 0.95rem; padding: 12px; border-radius: 8px; transition: 0.3s; }
+        .menu-item.active a, .menu-item a:hover { color: var(--text-main); background: rgba(0, 242, 254, 0.08); border-left: 4px solid var(--accent); }
+        
+        /* Widget de Estado */
+        .system-status-widget { background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.03); margin-top: auto; margin-bottom: 1.5rem; }
+        .status-item { display: flex; align-items: center; gap: 10px; font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); margin-bottom: 6px; }
+        .status-dot { width: 7px; height: 7px; background-color: var(--accent-green); border-radius: 50%; display: inline-block; box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); animation: pulse-green 2s infinite; }
+       
+        @keyframes pulse-green {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.5); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 255, 136, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+        }
+
+        main { flex: 1; padding: 3rem; margin-left: 280px; width: calc(100% - 280px); min-width: 0; }
+        header { margin-bottom: 2.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 1.5rem; }
+        header h1 { font-size: 2.3rem; font-weight: 700; line-height: 1.2; margin-bottom: 0.5rem; color: #fff; }
+        header span { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; }
+
+        /* Resumen Técnico */
+        .info-panel { background: rgba(20, 28, 47, 0.3); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2.5rem; display: flex; gap: 1.5rem; align-items: center; }
+        .info-panel i { font-size: 2.5rem; color: var(--accent); background: rgba(0, 242, 254, 0.05); padding: 20px; border-radius: 10px; border: 1px solid rgba(0, 242, 254, 0.1); }
+        .info-panel-text p { color: var(--text-muted); font-size: 0.92rem; line-height: 1.6; margin-top: 4px; }
+
+        /* GRID DE IMÁGENES */
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; width: 100%; margin-bottom: 3.5rem; }
+        
+        /* Tarjeta de Foto con info */
+        .gallery-item { background: var(--bg-card); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s; animation: fadeIn 0.6s ease-in-out forwards; }
+        .gallery-item:hover { transform: translateY(-6px); border-color: var(--accent); box-shadow: 0 0 25px rgba(0, 242, 254, 0.15); }
+        
+        /* Caja e Imagen con cursor de lupa */
+        .image-wrapper { width: 100%; height: 210px; background: #070b14; overflow: hidden; cursor: zoom-in; position: relative; }
+        .image-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .gallery-item:hover .image-wrapper img { transform: scale(1.05); }
+        
+        /* Overlay indicador al pasar el mouse por la foto */
+        .image-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 242, 254, 0.05); opacity: 0; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
+        .image-wrapper:hover .image-overlay { opacity: 1; }
+        .image-overlay i { color: #fff; font-size: 1.5rem; background: rgba(6, 10, 21, 0.8); padding: 12px; border-radius: 50%; border: 1px solid var(--accent); }
+
+        /* Textos de la tarjeta */
+        .item-details { padding: 1.2rem; display: flex; flex-direction: column; gap: 6px; flex: 1; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.03); }
+        .item-title { font-size: 0.98rem; font-weight: 600; color: #fff; }
+        .item-desc { color: var(--text-muted); font-size: 0.82rem; line-height: 1.4; }
+
+        /* VENTANA EMERGENTE (MODAL LIGHTBOX) */
+        .lightbox-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(4, 7, 15, 0.95); z-index: 2000; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; padding: 2rem; }
+        .lightbox-modal.show { display: flex; opacity: 1; }
+        
+        .modal-content { max-width: 90%; max-height: 85vh; object-fit: contain; border-radius: 8px; border: 1px solid rgba(0, 242, 254, 0.2); box-shadow: 0 0 40px rgba(0, 242, 254, 0.2); transform: scale(0.9); transition: transform 0.3s ease; }
+        .lightbox-modal.show .modal-content { transform: scale(1); }
+        
+        .close-modal { position: absolute; top: 20px; right: 25px; color: #fff; font-size: 2.5rem; font-weight: 300; cursor: pointer; transition: 0.3s; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border-radius: 50%; }
+        .close-modal:hover { color: var(--accent); background: rgba(255,255,255,0.1); }
+
+        /* PANEL ESPECIAL DEL VIDEOJUEGO */
+        .game-panel { background: linear-gradient(135deg, rgba(20, 28, 47, 0.8) 0%, rgba(10, 15, 29, 0.9) 100%); border: 1px solid var(--accent-green); border-radius: 16px; padding: 2.5rem; margin-top: 2rem; display: flex; justify-content: space-between; align-items: center; gap: 2rem; box-shadow: 0 0 30px rgba(0, 255, 136, 0.05); }
+        .game-info { display: flex; gap: 1.5rem; align-items: center; }
+        .game-info i { font-size: 3.5rem; color: var(--accent-green); text-shadow: 0 0 15px rgba(0, 255, 136, 0.4); }
+        .game-text h2 { font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: 0.3rem; }
+        .game-text p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; }
+        .game-btn { background: transparent; border: 2px solid var(--accent-green); color: var(--accent-green); padding: 14px 28px; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; font-weight: bold; border-radius: 8px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: 0.3s ease-in-out; white-space: nowrap; }
+        .game-btn:hover { background: var(--accent-green); color: #060a15; box-shadow: 0 0 25px var(--accent-green); transform: translateY(-3px); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        footer { background-color: var(--bg-sidebar); border-top: 1px solid var(--border); padding: 1.5rem; text-align: center; font-size: 0.88rem; color: var(--text-muted); margin-left: 280px; width: calc(100% - 280px); }
+        footer strong { color: var(--accent); }
+        
+        @media (max-width: 1024px) {
+            .dashboard-container { flex-direction: column; }
+            aside { position: static; width: 100%; height: auto; padding: 1.5rem; border-right: none; border-bottom: 1px solid var(--border); }
+            .menu-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1.5rem; }
+            .menu-item { margin-bottom: 0; }
+            .menu-item a { padding: 8px 14px; font-size: 0.9rem; }
+            .system-status-widget { display: none; }
+            main { margin-left: 0; width: 100%; padding: 2rem 1.5rem; }
+            header h1 { font-size: 1.8rem; }
+            .info-panel { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .info-panel i { padding: 14px; font-size: 2rem; }
+            .game-panel { flex-direction: column; align-items: flex-start; padding: 1.8rem; gap: 1.5rem; }
+            .game-btn { width: 100%; justify-content: center; }
+            footer { margin-left: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside>
+            <div>
+                <div class="logo"><i class="fa-solid fa-terminal"></i> CyberShield</div>
+                <ul class="menu-list">
+                    <li class="menu-item"><a href="index.html"><i class="fa-solid fa-chart-line"></i> Inicio & IA</a></li>
+                    <li class="menu-item"><a href="amenazas.html"><i class="fa-solid fa-virus-slash"></i> Base de Amenazas</a></li>
+                    <li class="menu-item"><a href="buenas-practicas.html"><i class="fa-solid fa-user-shield"></i> Buenas Prácticas</a></li>
+                    <li class="menu-item active"><a href="galeria.html"><i class="fa-solid fa-building-columns"></i> Evidencias CRUSAM</a></li>
+                </ul>
+            </div>
+            
+            <div class="system-status-widget">
+                <div class="status-item"><span class="status-dot"></span> Firewall: OPERATIVO</div>
+                <div class="status-item"><span class="status-dot"></span> Zero-Trust: PROTEGIDO</div>
+                <div class="status-item"><span class="status-dot"></span> Tráfico Red: NORMAL</div>
+            </div>
+            
+            <div style="color: var(--text-muted); font-size: 0.8rem; font-family: monospace;">CORE // V2.6</div>
+        </aside>
+
+        <main>
+            <header>
+                <span>ENTORNO ACADÉMICO / LOGS DE CAMPAÑA</span>
+                <h1>Campaña Realizada en la Universidad de Panamá - CRUSAM</h1>
+            </header>
+
+            <div class="info-panel">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <div class="info-panel-text">
+                    <p style="font-size: 1.05rem; font-weight: 600; color: #fff;">Galería de Evidencias de Ciberseguridad</p>
+                    <p>Registro visual detallado del desarrollo de la campaña en el campus. Haz clic sobre cualquier imagen para *abrirla a pantalla completa* y ver sus dimensiones y detalles reales sin recortes.</p>
+                </div>
+            </div>
+
+            <div class="gallery-grid">
+                
+                <div class="gallery-item">
+                    <div class="image-wrapper" onclick="openLightbox(this)">
+                        <img src="img1.jpg" alt="Montaje del Laboratorio">
+                        <div class="image-overlay"><i class="fa-solid fa-expand"></i></div>
+                    </div>
+                    <div class="item-details">
+                        <h3 class="item-title">Preparación del proyecto</h3>
+                        <p class="item-desc">Organización del mural, recortes y estructura inicial.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <div class="image-wrapper" onclick="openLightbox(this)">
+                        <img src="img2.jpg" alt="Integración de Circuitos">
+                        <div class="image-overlay"><i class="fa-solid fa-expand"></i></div>
+                    </div>
+                    <div class="item-details">
+                        <h3 class="item-title">Integración del Mural</h3>
+                        <p class="item-desc">Conexión de los elementos gráficos y la estructura física del mural.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <div class="image-wrapper" onclick="openLightbox(this)">
+                        <img src="img3.jpg" alt="Depuración del Sistema">
+                        <div class="image-overlay"><i class="fa-solid fa-expand"></i></div>
+                    </div>
+                    <div class="item-details">
+                        <h3 class="item-title">Mural Terminado</h3>
+                        <p class="item-desc">Visualización final del mural completado con todos los elementos integrados.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <div class="image-wrapper" onclick="openLightbox(this)">
+                        <img src="img4.jpg" alt="Ajuste de Interfaces">
+                        <div class="image-overlay"><i class="fa-solid fa-expand"></i></div>
+                    </div>
+                    <div class="item-details">
+                        <h3 class="item-title">Preparación del stand</h3>
+                        <p class="item-desc">Preparación y ensamblaje del stand para la exposición del la campaña.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <div class="image-wrapper" onclick="openLightbox(this)">
+                        <img src="img5.jpg" alt="Simulación Técnica">
+                        <div class="image-overlay"><i class="fa-solid fa-expand"></i></div>
+                    </div>
+                    <div class="item-details">
+                        <h3 class="item-title">Preparación del stand</h3>
+                        <p class="item-desc">Preparación y ensamblaje del stand para la exposición del la campaña.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <div class="image-wrapper" onclick="openLightbox(this)">
+                        <img src="img6.jpg" alt="Ajustes de Último Minuto">
+                        <div class="image-overlay"><i class="fa-solid fa-expand"></i></div>
+                    </div>
+                    <div class="item-details">
+                        <h3 class="item-title">Explicación del Proyecto</h3>
+                        <p class="item-desc">Presentación del concepto, objetivos y metodología del proyecto.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <div class="image-wrapper" onclick="openLightbox(this)">
+                        <img src="img7.jpg" alt="Apertura de Exposición">
+                        <div class="image-overlay"><i class="fa-solid fa-expand"></i></div>
+                    </div>
+                    <div class="item-details">
+                        <h3 class="item-title">Apertura de Exposición</h3>
+                        <p class="item-desc"> Entrega de folleto informativo, con información detallada sobre el proyecto.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <div class="image-wrapper" onclick="openLightbox(this)">
+                        <img src="img8.jpg" alt="Demostración en Vivo">
+                        <div class="image-overlay"><i class="fa-solid fa-expand"></i></div>
+                    </div>
+                    <div class="item-details">
+                        <h3 class="item-title">Exposición del mural</h3>
+                        <p class="item-desc">Visualización del mural completado con todos los elementos integrados.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <div class="image-wrapper" onclick="openLightbox(this)">
+                        <img src="img9.jpg" alt="Interacción Universitaria">
+                        <div class="image-overlay"><i class="fa-solid fa-expand"></i></div>
+                    </div>
+                    <div class="item-details">
+                        <h3 class="item-title">Exposición sobre las páginas web</h3>
+                        <p class="item-desc">Explicación de la importancia de la seguridad en las páginas web y cómo protegerse de amenazas comunes.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <div class="image-wrapper" onclick="openLightbox(this)">
+                        <img src="img10.jpg" alt="Ronda de Preguntas">
+                        <div class="image-overlay"><i class="fa-solid fa-expand"></i></div>
+                    </div>
+                    <div class="item-details">
+                        <h3 class="item-title">Visualización del stand</h3>
+                        <p class="item-desc">Presentación del stand diseñado para mostrar los elementos clave del proyecto, junto a colaboradores.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <div class="image-wrapper" onclick="openLightbox(this)">
+                        <img src="img11.jpg" alt="Evaluación Final">
+                        <div class="image-overlay"><i class="fa-solid fa-expand"></i></div>
+                    </div>
+                    <div class="item-details">
+                        <h3 class="item-title">Reseñas sobre el videojuego web</h3>
+                        <p class="item-desc">Comentarios y evaluaciones de los usuarios que han probado el videojuego desarrollado como parte de la campaña de concientización.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <div class="image-wrapper" onclick="openLightbox(this)">
+                        <img src="img12.jpg" alt="Cierre del Proyecto">
+                        <div class="image-overlay"><i class="fa-solid fa-expand"></i></div>
+                    </div>
+                    <div class="item-details">
+                        <h3 class="item-title">Reseñas sobre el videojuego web</h3>
+                        <p class="item-desc">Comentarios y evaluaciones de los usuarios que han probado el videojuego desarrollado como parte de la campaña de concientización.</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="game-panel">
+                <div class="game-info">
+                    <i class="fa-solid fa-gamepad"></i>
+                    <div class="game-text">
+                        <h2>Módulo Interactivo: Videojuego de Concientización</h2>
+                        <p>Como parte de las dinámicas de la campaña, desarrollamos un entorno lúdico e interactivo para evaluar los conocimientos en ciberseguridad y toma de decisiones tácticas de los participantes.</p>
+                    </div>
+                </div>
+                <a href="https://manuelquiel507-design.github.io/cyber-combat/" target="_blank" class="game-btn">
+                    <i class="fa-solid fa-play"></i> EJECUTAR JUEGO
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <div id="lightbox" class="lightbox-modal" onclick="closeLightbox()">
+        <span class="close-modal">&times;</span>
+        <img class="modal-content" id="imgModal" alt="Vista Completa">
+    </div>
+    
+    <footer>Plataforma de Concientización &copy; 2026 | Desarrollada por <strong>Manuel Alexander Quiel Albelo</strong></footer>
+
+    <script>
+        function openLightbox(element) {
+            const modal = document.getElementById('lightbox');
+            const modalImg = document.getElementById('imgModal');
+            const clickedImgSrc = element.querySelector('img').src;
+            
+            modal.classList.add('show');
+            modalImg.src = clickedImgSrc;
+        }
+
+        function closeLightbox() {
+            const modal = document.getElementById('lightbox');
+            modal.classList.remove('show');
+        }
+    </script>
+</body>
+</html>
